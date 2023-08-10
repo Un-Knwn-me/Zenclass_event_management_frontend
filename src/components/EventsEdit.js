@@ -6,37 +6,17 @@ import { URL, token } from "../App";
 import axios from "axios";
 import SaveAsIcon from "@mui/icons-material/SaveAs";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import dayjs from "dayjs";
 import { DateTimePicker, LocalizationProvider, renderTimeViewClock } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { toast } from "react-toastify";
 
-const formatDate = (dateString) => {
-  if (!dateString) {
-    return "-";
-  }
-
-  const date = new Date(dateString);
-  const formattedDate = date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-  const formattedTime = date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "numeric",
-  });
-  return `${formattedDate} ${formattedTime}`;
-};
 
 const EventsEdit = () => {
   const { id } = useParams();
   const [eventData, setEventData] = useState({ students: [] });
   const [batchData, setBatchData] = useState([]);
-  const [batch, setBatch] = useState(eventData?.batch);
+  const [batch] = useState(eventData?.batch);
   const navigate = useNavigate();
-  const defaultStartDate = dayjs(eventData?.startDate);
-  const defaultEndDate = dayjs(eventData?.endDate);
   const [startsDate, setStartsDate] = useState();
   const [endsDate, setEndsDate] = useState();
 
@@ -61,15 +41,8 @@ const EventsEdit = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      const formattedData = {
-        ...response.data,
-        createdAt: formatDate(response.data.createdAt),
-        updatedAt: formatDate(response.data.updatedAt),
-        startDate: dayjs(response.data.startDate).toDate(),
-        endDate: dayjs(response.data.endDate),
-      };
 
-      setEventData(formattedData);
+      setEventData(response.data);
     } catch (error) {
       console.error(error);
     }
@@ -78,7 +51,11 @@ const EventsEdit = () => {
   useEffect(() => {
     fetchEventData();
     getBatch();
-  }, [id]);
+  }, []);
+
+// Initialize the default batch value using eventData.batchId
+const defaultBatchValue = eventData.batchId ? eventData.batchId : null;
+const [selectedBatch, setSelectedBatch] = useState(defaultBatchValue);
 
   // Function to handle input changes for all the fields
   const handleInputChange = (e) => {
@@ -88,6 +65,7 @@ const EventsEdit = () => {
   // Function to handle the date selection
   const handleStartDate = (newValue) => {
     setStartsDate(newValue);
+    console.log(newValue)
   };
 
   const handleEndDate = (newValue) => {
@@ -201,6 +179,60 @@ const EventsEdit = () => {
                           Event Details
                         </Typography>
                       </Grid>
+<br/>
+
+                      <Grid
+                            item
+                            sm={12}
+                            md={12}
+                            lg={12}
+                            sx={{
+                              display: "flex",
+                              justifyContent: "center",
+                              mt: 2,
+                            }}
+                          >
+                            <Typography>Batch:- </Typography>
+                            <Typography variant="button" sx={{ ml: 1 }}>
+                              {" "}
+                              {eventData?.batch}
+                            </Typography>
+                          </Grid>
+
+                          <Grid
+                            item
+                            sm={12}
+                            md={12}
+                            lg={12}
+                            sx={{
+                              display: "flex",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Typography>Start Date and Time:- {" "}</Typography>
+                            <Typography variant="button" sx={{ ml: 1 }}>
+                              {" "}
+                              {eventData?.startDate}
+                            </Typography>
+                          </Grid>
+
+                          <Grid
+                            item
+                            sm={12}
+                            md={12}
+                            lg={12}
+                            sx={{
+                              display: "flex",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Typography>End Date and Time:- {" "}</Typography>
+                            <Typography variant="button" sx={{ ml: 1 }}>
+                              {" "}
+                              {eventData?.endDate}
+                            </Typography>
+                          </Grid>
+
                       <Grid
                         item
                         sm={12}
@@ -245,73 +277,6 @@ const EventsEdit = () => {
                             onChange={(e) => handleInputChange(e)}
                           />
 
-                          <Grid
-                            item
-                            sm={12}
-                            md={12}
-                            lg={12}
-                            sx={{
-                              display: "flex",
-                              justifyContent: "center",
-                              mt: 2,
-                            }}
-                          >
-                            <Typography>Batch:- </Typography>
-                            <Typography variant="button">
-                              {" "}
-                              {eventData?.batch}
-                            </Typography>
-                          </Grid>
-
-                          <Autocomplete
-                            fullWidth
-                            required
-                            disablePortal
-                            id="combo-box-demo"
-                            options={batchData}
-                            getOptionLabel={(option) => option.batch}
-                            sx={{ width: 300, mt: 1 }}
-                            onChange={(e, value) => setBatch(value)}
-                            value={batchData._id}
-                            defaultValue={eventData.batchId}
-                            isOptionEqualToValue={(option, value) =>
-                              option._id === value._id
-                            }
-                            renderInput={(params) => (
-                              <TextField {...params} label="Select New Batch" />
-                            )}
-                          />
-
-                          <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <DateTimePicker
-                              required
-                              defaultValue={defaultStartDate}
-                              sx={{ mt: 1, mr: 1 }}
-                              onChange={handleStartDate}
-                              label="Start Date & Time"
-                              viewRenderers={{
-                                hours: renderTimeViewClock,
-                                minutes: renderTimeViewClock,
-                                seconds: renderTimeViewClock,
-                              }}
-                            />
-                          </LocalizationProvider>
-
-                          <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <DateTimePicker
-                              required
-                              defaultValue={defaultEndDate}
-                              onChange={handleEndDate}
-                              label="End Date & Time"
-                              sx={{ mt: 1 }}
-                              viewRenderers={{
-                                hours: renderTimeViewClock,
-                                minutes: renderTimeViewClock,
-                                seconds: renderTimeViewClock,
-                              }}
-                            />
-                          </LocalizationProvider>
-
                           <TextField
                             fullWidth
                             required
@@ -342,8 +307,55 @@ const EventsEdit = () => {
                           </Typography>
                           <Typography>
                             {" "}
-                            {eventData.students.join(", ")}
+                            {/* {eventData.students.join(", ")} */}
                           </Typography>
+                          <br/>
+<hr/><br/>
+                          <Typography variant="button" sx={{ mt: 2 }}> Change the batch and event date & time:</Typography>
+<br/>
+                          <Autocomplete
+                            fullWidth
+                            required
+                            disablePortal
+                            id="combo-box-demo"
+                            options={batchData}
+                            getOptionLabel={(option) => option.batch}
+                            sx={{ width: 300, mt: 1 }}
+                            onChange={(e, value) => setSelectedBatch(value)}
+                            value={selectedBatch}
+                            defaultValue={defaultBatchValue}
+                            isOptionEqualToValue={(option, value) => option._id === value?._id}
+                            renderInput={(params) => (
+                              <TextField {...params} label="Select New Batch" />
+                            )}
+                          />
+
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <DateTimePicker
+                            sx={{ mt: 1, mr: 1 }}
+                            onChange={handleStartDate}
+                            label="Start Date & Time"
+                            viewRenderers={{
+                              hours: renderTimeViewClock,
+                              minutes: renderTimeViewClock,
+                              seconds: renderTimeViewClock,
+                            }}
+                          />
+                      </LocalizationProvider>
+                          
+
+                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DateTimePicker
+                              onChange={handleEndDate}
+                              label="End Date & Time"
+                              sx={{ mt: 1 }}
+                              viewRenderers={{
+                                hours: renderTimeViewClock,
+                                minutes: renderTimeViewClock,
+                                seconds: renderTimeViewClock,
+                              }}
+                            />
+                          </LocalizationProvider>
 
                           <Fab
                             variant="extended"

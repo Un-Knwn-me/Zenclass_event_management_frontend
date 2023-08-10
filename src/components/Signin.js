@@ -1,9 +1,13 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { AppBar, Avatar, Box, Button, Checkbox, CssBaseline, FormControlLabel, Grid, Link, Paper, TextField, ThemeProvider, Toolbar, Typography, createTheme } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useNavigate } from 'react-router-dom';
 import {URL} from '../App';
-// import { toast } from 'react-toastify';
+import Visibility from '@mui/icons-material/Visibility';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { toast } from 'react-toastify';
 import axios from 'axios';
 
 
@@ -32,6 +36,14 @@ const { augmentColor } = palette;
 const Signin = () => {
   
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
+
 
   const handleSubmit = async(event) => {
     try {
@@ -48,11 +60,11 @@ const Signin = () => {
       if(res.status === 200){
         navigate("/dashboard")
         sessionStorage.setItem("token", res.data.token);
-        // toast.success(res.data.message);
+        toast.success(res.data.message);
       }
     
   } catch (error) {
-    // toast.error(error.res.data.message);
+    toast.error(error.res.data.message);
   }   
     };
       
@@ -125,7 +137,19 @@ const Signin = () => {
                 name="password"
                 color='tang'
                 label="Password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
+                endAdornment={
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                }
                 id="password"
                 autoComplete="current-password"
               />

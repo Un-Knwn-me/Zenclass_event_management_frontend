@@ -8,24 +8,6 @@ import SaveAsIcon from "@mui/icons-material/SaveAs";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { toast } from 'react-toastify';
 
-const formatDate = (dateString) => {
-  if (!dateString) {
-    return "-";
-  }
-
-  const date = new Date(dateString);
-  const formattedDate = date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-  const formattedTime = date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "numeric",
-  });
-  return `${formattedDate} ${formattedTime}`;
-};
-
 const MentorsEdit = () => {
   const { id } = useParams();
   const [mentorData, setMentorData] = useState(); 
@@ -39,13 +21,8 @@ const MentorsEdit = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      const formattedData = {
-        ...response.data,
-        createdAt: formatDate(response.data.createdAt),
-        updatedAt: formatDate(response.data.updatedAt),
-      };
 
-      setMentorData(formattedData);
+      setMentorData(response.data);
     } catch (error) {
       console.error(error);
     }

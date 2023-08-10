@@ -13,7 +13,7 @@ import BatchEdit from './components/BatchEdit';
 import MentorsEdit from './components/MentorsEdit';
 
 
-export const URL = "http://localhost:12000"
+export const URL = "https://zen-class-event-management-for-students.onrender.com"
 export const token = sessionStorage.getItem('token');
 
 function App() {

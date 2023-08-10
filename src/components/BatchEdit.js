@@ -7,35 +7,16 @@ import { URL, token } from "../App";
 import axios from "axios";
 import { useEffect } from 'react';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import dayjs from 'dayjs';
 import { DateTimePicker, LocalizationProvider, renderTimeViewClock } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { toast } from 'react-toastify';
 import SaveAsIcon from "@mui/icons-material/SaveAs";
 
-const formatDate = (dateString) => {
-  if (!dateString) {
-    return "-";
-  }
-
-  const date = new Date(dateString);
-  const formattedDate = date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-  const formattedTime = date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "numeric",
-  });
-  return `${formattedDate} ${formattedTime}`;
-};
 
 const BatchEdit = () => {
     const { id } = useParams();
     const [batchData, setBatchData] = useState([]);
     const navigate = useNavigate();
-    const defaultStartDate = dayjs(batchData?.startDate);
     const [startsDate, setStartsDate] = useState();
 
   // Fetch the data of the particular batch based on the id
@@ -46,14 +27,8 @@ const BatchEdit = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      const formattedData = {
-        ...response.data,
-        createdAt: formatDate(response.data.createdAt),
-        updatedAt: formatDate(response.data.updatedAt),
-        startDate: dayjs(response.data.startDate).toDate(),
-      };
 
-      setBatchData(formattedData);
+      setBatchData(response.data);
     } catch (error) {
       console.error(error);
     }
@@ -160,20 +135,11 @@ const BatchEdit = () => {
                   <Grid container spacing={3} sx={{ mt: 1}}>
                   <Grid item xs={12} md={6} lg={6} sx={{ display: 'flex', justifyContent: 'center' }}>
                     
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <DateTimePicker
-                              required
-                              defaultValue={defaultStartDate}
-                              sx={{ mt: 1, mr: 1 }}
-                              onChange={handleStartDate}
-                              label="Start Date & Time"
-                              viewRenderers={{
-                                hours: renderTimeViewClock,
-                                minutes: renderTimeViewClock,
-                                seconds: renderTimeViewClock,
-                              }}
-                            />
-                    </LocalizationProvider>
+                  <Typography>Start Date and Time:- {" "}</Typography>
+                            <Typography variant="button" sx={{ ml: 1 }}>
+                              {" "}
+                              {batchData?.startDate}
+                            </Typography>
                   
                   </Grid>
                   <Grid item xs={12} md={6} lg={6} sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -190,6 +156,27 @@ const BatchEdit = () => {
                   </Typography>
 
                   </Grid>
+
+                  <br/>
+<hr/><br/>
+<Grid item sm={12} md={12} lg={12} sx={{ display: 'flex', justifyContent: 'center'}}>
+                          <Typography variant="button" sx={{ mt: 2 }}> Change the batch date & time:</Typography>
+                          </Grid>
+<br/>
+<Grid item sm={12} md={12} lg={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <DateTimePicker
+                            sx={{ mt: 1, mr: 1 }}
+                            onChange={handleStartDate}
+                            label="Start Date & Time"
+                            viewRenderers={{
+                              hours: renderTimeViewClock,
+                              minutes: renderTimeViewClock,
+                              seconds: renderTimeViewClock,
+                            }}
+                          />
+                      </LocalizationProvider>
+                      </Grid>
                   <Grid
                       item
                       xs={12}

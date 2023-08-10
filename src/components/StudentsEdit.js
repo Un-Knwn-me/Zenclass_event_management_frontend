@@ -1,6 +1,6 @@
 import React from "react";
 import Base from "./Base";
-import { Box, Fab, Grid, Paper, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Fab, Grid, Paper, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
@@ -10,27 +10,11 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import SaveAsIcon from "@mui/icons-material/SaveAs";
 import { toast } from "react-toastify";
 
-const formatDate = (dateString) => {
-  if (!dateString) {
-    return "-";
-  }
-
-  const date = new Date(dateString);
-  const formattedDate = date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-  const formattedTime = date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "numeric",
-  });
-  return `${formattedDate} ${formattedTime}`;
-};
-
 const StudentsEdit = () => {
   const { id } = useParams();
   const [studentsData, setStudentsData] = useState();
+  const [batches, setBatches] = useState([]);
+  const [batch, setBatch] = useState('');
   const navigate = useNavigate();
 
   // Fetch the data of the particular student based on the id
@@ -41,20 +25,29 @@ const StudentsEdit = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      const formattedData = {
-        ...response.data,
-        createdAt: formatDate(response.data.createdAt),
-        updatedAt: formatDate(response.data.updatedAt),
-      };
 
-      setStudentsData(formattedData);
+      setStudentsData(response.data);
     } catch (error) {
       console.error(error);
     }
   };
 
+  const getBatch = async () => {
+    try {
+      const res = await axios.get(`${URL}/batch/list`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setBatches(res.data.batches);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     fetchStudentData();
+    getBatch();
   }, [id]);
 
   // Function to handle input changes for all the fields
@@ -68,9 +61,11 @@ const StudentsEdit = () => {
       const payload = {
         fullName: studentsData.fullName,
         mobile: studentsData.mobile,
-        batch: studentsData.batch,
         email: studentsData.email,
       };
+      if(batch){
+        payload.batch= batch.batch;
+      }
 
       const response = await axios.put(
         `${URL}/students/update/${id}`,
@@ -219,6 +214,26 @@ const StudentsEdit = () => {
                         />
                       </Grid>
                     </Grid>
+
+                    <br/>
+<hr/><br/>
+<Grid item sm={12} md={12} lg={12} sx={{ display: 'flex', justifyContent: 'center'}}>
+                          <Typography variant="button" sx={{ mt: 2 }}> Change the batch:</Typography>
+                          </Grid>
+<br/>
+<Grid item sm={12} md={12} lg={12} sx={{ display: 'flex', justifyContent: 'center'}}>
+                  <Autocomplete
+                    disablePortal
+                    id="combo-box-demo"
+                    options={batches}
+                    getOptionLabel={(option) => option.batch}
+                    sx={{ width: 300 }}
+                    onChange={(e, value)=>setBatch(value)}
+                    value={batches.batch}
+                    isOptionEqualToValue={(option, value) => option.batch === value.batch}
+                    renderInput={(params) => <TextField {...params} label="Select Batch" />}
+                    />
+</Grid>
                     <Grid
                       item
                       xs={12}
